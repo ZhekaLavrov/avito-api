@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 from pydantic import BaseModel, Field
 
@@ -43,6 +43,10 @@ class AutoloadItemInfo(BaseModel):
     processing_time: datetime = ''
     section: Section = Section.parse_obj({})
     url: str = ''
+
+
+class Ok(BaseModel):
+    ok: bool
 
 
 class ItemStatsShallow(BaseModel):

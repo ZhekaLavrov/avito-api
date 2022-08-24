@@ -4,7 +4,7 @@ from typing import Literal
 import requests
 
 from avito_api.rest_types import AccessToken, AutoloadItemInfo, UserInfoSelf, ItemStatsShallow, ItemStatsShallowDay, \
-    ItemStatsShallowWeek, ItemStatsShallowMonth
+    ItemStatsShallowWeek, ItemStatsShallowMonth, Ok
 from avito_api.exceptions import Error
 
 
@@ -256,6 +256,58 @@ class AvitoApi:
                                                        "uniqFavorites"]] = None) -> list[ItemStatsShallowMonth]:
         items = self.items_stats_shallow(date_from, date_to, item_ids, fields, "month")
         return items
+
+    def __post_webhook_v2(self, url: str) -> dict:
+        """
+        Включение V2 уведомлений
+        https://developers.avito.ru/api-catalog/messenger/documentation#operation/postWebhookV2
+        :param url: Url на который будут отправляться нотификации
+        :return:
+        """
+        requests_url = 'https://api.avito.ru/messenger/v2/webhook'
+        headers = {
+            'Authorization': f"Bearer {self.__access_token}",
+            'Content-Type': 'application/json',
+        }
+        response = requests.post(requests_url, headers=headers, json={"url": url})
+        data = response.json()
+        return data
+
+    def post_webhook_v2(self, url: str) -> Ok:
+        """
+        Включение V2 уведомлений
+        https://developers.avito.ru/api-catalog/messenger/documentation#operation/postWebhookV2
+        :param url: Url на который будут отправляться нотификации
+        :return:
+        """
+        ok = Ok.parse_obj(self.__post_webhook_v2(url))
+        return ok
+
+    def __post_webhook_unsubscribe(self, url: str) -> dict:
+        """
+        Отключение уведомлений
+        https://developers.avito.ru/api-catalog/messenger/documentation#operation/postWebhookUnsubscribe
+        :param url: Url, на который необходимо перестать слать уведомления.
+        :return:
+        """
+        requests_url = 'https://api.avito.ru/messenger/v1/webhook/unsubscribe'
+        headers = {
+            'Authorization': f"Bearer {self.__access_token}",
+            'Content-Type': 'application/json',
+        }
+        response = requests.post(requests_url, headers=headers, json={"url": url})
+        data = response.json()
+        return data
+
+    def post_webhook_unsubscribe(self, url: str) -> Ok:
+        """
+        Отключение уведомлений
+        https://developers.avito.ru/api-catalog/messenger/documentation#operation/postWebhookUnsubscribe
+        :param url: Url, на который необходимо перестать слать уведомления.
+        :return:
+        """
+        ok = Ok.parse_obj(self.__post_webhook_unsubscribe(url))
+        return ok
 
     def __str__(self):
         return f"id: {self.id}"
